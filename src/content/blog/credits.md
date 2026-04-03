@@ -16,7 +16,7 @@ Dan, you are the man that made all of this possible. You believed in me when I d
 
 ---
 
-**[Nate B Jones](https://www.youtube.com/@natebjonestech)**
+**[Nate B Jones](https://www.youtube.com/@NateBJones)**
 
 Every time I watch one of your videos it reinvigorates my belief in myself and gives me a new map to further explore this incredible world of AI. Thank you so much for your contributions to the community.
 
