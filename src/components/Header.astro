@@ -1,6 +1,11 @@
 ---
+import { getCollection } from 'astro:content';
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+
+const comingSoon = (await getCollection('blog'))
+	.filter((p) => p.data.draft)
+	.sort((a, b) => a.data.title.localeCompare(b.data.title));
 ---
 
 <header>
@@ -9,7 +14,16 @@ import HeaderLink from './HeaderLink.astro';
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
 			<HeaderLink href="/blog">Blog</HeaderLink>
-			<HeaderLink href="/coming-soon">Coming Soon</HeaderLink>
+			{comingSoon.length > 0 && (
+				<div class="nav-dropdown">
+					<span class="nav-dropdown-label">Coming Soon ▾</span>
+					<ul class="nav-dropdown-menu">
+						{comingSoon.map((post) => (
+							<li><span>{post.data.title}</span></li>
+						))}
+					</ul>
+				</div>
+			)}
 			<HeaderLink href="/about">About</HeaderLink>
 		</div>
 		<div class="social-links">
@@ -73,6 +87,43 @@ import HeaderLink from './HeaderLink.astro';
 	nav a.active {
 		text-decoration: none;
 		border-bottom-color: var(--accent);
+	}
+	.nav-dropdown {
+		position: relative;
+		display: inline-block;
+	}
+	.nav-dropdown-label {
+		padding: 1em 0.5em;
+		color: var(--black);
+		cursor: default;
+		font-size: inherit;
+		white-space: nowrap;
+	}
+	.nav-dropdown-menu {
+		display: none;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		background: white;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 6px;
+		box-shadow: 0 4px 12px rgba(var(--black), 8%);
+		list-style: none;
+		margin: 0;
+		padding: 0.4rem 0;
+		min-width: 220px;
+		z-index: 100;
+	}
+	.nav-dropdown-menu li {
+		padding: 0.45rem 1rem;
+		font-size: 0.88rem;
+		color: rgb(var(--gray));
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.nav-dropdown:hover .nav-dropdown-menu {
+		display: block;
 	}
 	.social-links,
 	.social-links a {
