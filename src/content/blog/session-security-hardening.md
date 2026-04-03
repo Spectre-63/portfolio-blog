@@ -3,7 +3,7 @@ title: "Session: Security Hardening the Homelab"
 description: "Reviewing and remediating security findings across the homelab — secrets exposure, network segmentation, and Claude session controls."
 pubDate: 2026-03-30
 category: sessions
-draft: false
+draft: true
 ---
 
 *Full write-up coming soon.*

@@ -6,7 +6,7 @@ category: sessions
 draft: false
 ---
 
-**If you aren't following [Nate B. Jones](https://www.youtube.com/@natebjonestech) on YouTube and are trying to expand your understanding of AI and how best to work with it — stop right now and go watch a couple of his videos.** They're feature-rich, the information is actionable, and [THIS VIDEO](https://youtu.be/5ztI_dbj6ek?si=SvPXNUxZ9ITg4GbY) on token burn from naive PDF ingestion is exactly what sent me back to the OpenBrain codebase with a fresh set of eyes.
+**If you aren't following [Nate B. Jones](https://www.youtube.com/@NateBJones) on YouTube and are trying to expand your understanding of AI and how best to work with it — stop right now and go watch a couple of his videos.** They're feature-rich, the information is actionable, and [THIS VIDEO](https://youtu.be/5ztI_dbj6ek?si=SvPXNUxZ9ITg4GbY) on token burn from naive PDF ingestion is exactly what sent me back to the OpenBrain codebase with a fresh set of eyes.
 
 Nate's video specifically touches on maximizing your token usage. The changes documented here reflect that effort — and then some.
 
