@@ -39,4 +39,4 @@ The agent eval harness answers that question with reproducible data.
 
 Opus 4.6 was added after the initial 4-model run. It matched Haiku's retry count, reproduced the same cluster topology speculation failure on `fail-vm-complex`, and cost 57× more than Sonnet. Haiku remains the production diagnosis model.
 
-Session notes: [Agent Eval Harness](/blog/session-agent-eval-harness)
+Session notes: [Agent Eval Harness](/blog/session-agent-eval-harness) · [Ingestion Efficiency](/blog/session-ingest-pipeline-evolution)
