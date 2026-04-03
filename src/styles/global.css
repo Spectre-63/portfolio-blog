@@ -111,6 +111,17 @@ body {
 	font-weight: 500;
 }
 
+.sidebar-nav .coming-soon-item {
+	display: block;
+	padding: 0.3rem 0.5rem;
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	opacity: 0.6;
+	font-style: italic;
+	line-height: 1.4;
+	cursor: default;
+}
+
 .main-content {
 	flex: 1;
 	min-width: 0;
