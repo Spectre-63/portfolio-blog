@@ -6,7 +6,7 @@ category: sessions
 draft: false
 ---
 
-**If you aren't following [Nate B. Jones](https://www.youtube.com/@natebjonestech) on YouTube and are trying to expand your understanding of AI and how best to work with it — stop right now and go watch a couple of his videos.** They're feature-rich, the information is actionable, and [this video on token burn from naive PDF ingestion](https://youtu.be/5ztI_dbj6ek?si=SvPXNUxZ9ITg4GbY) is exactly what sent me back to the OpenBrain codebase with a fresh set of eyes.
+**If you aren't following [Nate B. Jones](https://www.youtube.com/@natebjonestech) on YouTube and are trying to expand your understanding of AI and how best to work with it — stop right now and go watch a couple of his videos.** They're feature-rich, the information is actionable, and [THIS VIDEO](https://youtu.be/5ztI_dbj6ek?si=SvPXNUxZ9ITg4GbY) on token burn from naive PDF ingestion is exactly what sent me back to the OpenBrain codebase with a fresh set of eyes.
 
 Nate's video specifically touches on maximizing your token usage. The changes documented here reflect that effort — and then some.
 
@@ -14,7 +14,7 @@ Nate's video specifically touches on maximizing your token usage. The changes do
 
 ## What We Found When We Actually Looked
 
-OpenBrain had been ingesting documents for months. Study notes, PDFs, web pages, Word docs — all going into Supabase pgvector, all queryable. The retrieval eval was running at 96.9%. From the outside, it worked.
+OpenBrain had been ingesting documents for a couple of weeks. Study notes, PDFs, web pages, Word docs — all going into Supabase pgvector, all queryable. The retrieval eval was running at 96.9%. From the outside, it worked.
 
 Then I actually read the ingest code.
 
@@ -38,7 +38,7 @@ The overlap alone was a 20% token tax on every document we'd ever ingested. A 20
 
 ## The PDF Problem Was Actually Three Problems
 
-PDFs are not one thing. After looking at what Beth was actually uploading — and what Annie's school was generating — three categories emerged clearly:
+PDFs are not one thing. After looking at what my wife Beth was actually uploading — and what Annie's school was generating — three categories emerged clearly:
 
 | Type | Signal | What it needs |
 |---|---|---|
