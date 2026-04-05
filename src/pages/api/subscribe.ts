@@ -50,7 +50,7 @@ export const POST: APIRoute = async (context) => {
     if (error) {
       console.error('Database error:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to subscribe' }),
+        JSON.stringify({ error: 'Failed to subscribe', details: error.message || String(error) }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
