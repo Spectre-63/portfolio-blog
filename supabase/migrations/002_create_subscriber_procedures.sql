@@ -43,6 +43,12 @@ exception when others then
 end;
 $$ language plpgsql security definer set search_path = public, portfolio_blog;
 
+-- Function: Get subscriber by email (for unsubscribe page)
+create or replace function public.get_subscriber_by_email(p_email text)
+returns table(email text, unsubscribe_token text) as $$
+  select email, unsubscribe_token from portfolio_blog.subscribers where email = p_email limit 1;
+$$ language sql security definer set search_path = public, portfolio_blog;
+
 -- Function: Get verified subscribers (for cron)
 create or replace function public.get_verified_subscribers()
 returns table(email text, unsubscribe_token text) as $$
@@ -78,6 +84,7 @@ $$ language plpgsql security definer set search_path = public, portfolio_blog;
 -- Grant execute permissions on functions to anon role (public signup) and authenticated role
 grant execute on function public.subscribe(text, text) to anon, authenticated;
 grant execute on function public.unsubscribe(text) to anon, authenticated;
+grant execute on function public.get_subscriber_by_email(text) to anon, authenticated;
 grant execute on function public.get_verified_subscribers() to service_role;
 grant execute on function public.get_last_newsletter_send() to service_role;
 grant execute on function public.insert_newsletter_send(text, int, timestamp with time zone, int, text, text) to service_role;
