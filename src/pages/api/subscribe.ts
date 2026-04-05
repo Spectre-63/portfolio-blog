@@ -21,44 +21,46 @@ export const POST: APIRoute = async (context) => {
 
     const db = getSupabaseClient();
 
-    // Check if already subscribed
-    const { data: existing } = await db
-      .from('portfolio_blog.subscribers')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (existing) {
-      return new Response(
-        JSON.stringify({ error: 'Already subscribed with this email' }),
-        { status: 409, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Generate unsubscribe token
     const token = crypto.getRandomValues(new Uint8Array(16)).reduce((acc, byte) => {
       return acc + byte.toString(16).padStart(2, '0');
     }, '');
 
-    // Insert subscriber
-    const { error } = await db.from('portfolio_blog.subscribers').insert({
-      email,
-      unsubscribe_token: token,
-      verified: true,
+    // Call stored procedure to subscribe
+    const { data, error } = await db.rpc('subscribe', {
+      p_email: email,
+      p_unsubscribe_token: token,
     });
 
     if (error) {
       console.error('Database error:', error);
+      // Check if it's a duplicate email error
+      if (data?.error?.includes('Already subscribed')) {
+        return new Response(
+          JSON.stringify({ error: 'Already subscribed with this email' }),
+          { status: 409, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
       return new Response(
-        JSON.stringify({ error: 'Failed to subscribe', details: error.message || String(error) }),
+        JSON.stringify({ error: 'Failed to subscribe' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const result = typeof data === 'string' ? JSON.parse(data) : data;
+
+    if (!result.success) {
+      return new Response(
+        JSON.stringify({ error: result.error || 'Failed to subscribe' }),
+        { status: result.error?.includes('Already') ? 409 : 500,
+          headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Subscribed! You will receive a digest of new posts every day at midnight UTC.',
+        message: result.message,
       }),
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     );
