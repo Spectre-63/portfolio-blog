@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 
-export function renderDigestAsHtml(posts: CollectionEntry<'blog'>[]): string {
+export function renderDigestAsHtml(posts: CollectionEntry<'blog'>[], unsubscribeToken?: string): string {
   const siteUrl = 'https://mikemcmahon.dev';
   const postsHtml = posts
     .map(
@@ -94,7 +94,10 @@ export function renderDigestAsHtml(posts: CollectionEntry<'blog'>[]): string {
           <a href="${siteUrl}">Visit the blog</a> •
           <a href="${siteUrl}/rss.xml">Subscribe via RSS</a>
         </p>
-        <p style="margin-top: 15px; color: #ccc;">
+        <p style="margin-top: 15px; font-size: 11px; color: #999;">
+          Want to unsubscribe? Visit <a href="${siteUrl}/unsubscribe" style="color: #3D6B7D;">the unsubscribe page</a> or use the unsubscribe button in your email client.
+        </p>
+        <p style="margin-top: 10px; color: #ccc;">
           Built with Claude AI • © ${year} Mike McMahon
         </p>
       </div>

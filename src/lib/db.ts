@@ -26,20 +26,5 @@ export function getSupabaseClient() {
     throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
 
-  return createClient<{
-    public: {
-      Tables: {
-        subscribers: {
-          Row: Subscriber;
-          Insert: Omit<Subscriber, 'id' | 'created_at'>;
-          Update: Partial<Subscriber>;
-        };
-        newsletter_sends: {
-          Row: NewsletterSend;
-          Insert: Omit<NewsletterSend, 'id'>;
-          Update: Partial<NewsletterSend>;
-        };
-      };
-    };
-  }>(url, key);
+  return createClient(url, key);
 }

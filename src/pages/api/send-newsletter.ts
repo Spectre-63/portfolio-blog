@@ -21,16 +21,15 @@ export const POST: APIRoute = async (context) => {
 
     const db = getSupabaseClient();
 
-    // Get timestamp of last newsletter send
-    const { data: lastSend } = await db
-      .from('newsletter_sends')
-      .select('sent_at')
-      .order('sent_at', { ascending: false })
-      .limit(1)
-      .single();
+    // Get timestamp of last newsletter send via stored procedure
+    const { data: lastSendTimestamp, error: lastSendError } = await db.rpc('get_last_newsletter_send');
 
-    const sinceTimestamp = lastSend?.sent_at
-      ? new Date(lastSend.sent_at)
+    if (lastSendError) {
+      console.error('Error fetching last send timestamp:', lastSendError);
+    }
+
+    const sinceTimestamp = lastSendTimestamp
+      ? new Date(lastSendTimestamp)
       : new Date(Date.now() - SEVEN_DAYS_MS);
 
     console.log(`📧 Newsletter cron: checking for posts since ${sinceTimestamp.toISOString()}`);
@@ -51,11 +50,8 @@ export const POST: APIRoute = async (context) => {
 
     console.log(`📧 Found ${newPosts.length} new post(s)`);
 
-    // Get verified subscribers
-    const { data: subscribers, error: subError } = await db
-      .from('subscribers')
-      .select('email, unsubscribe_token')
-      .eq('verified', true);
+    // Get verified subscribers via stored procedure
+    const { data: subscribers, error: subError } = await db.rpc('get_verified_subscribers');
 
     if (subError || !subscribers || subscribers.length === 0) {
       console.log('✅ No verified subscribers');
@@ -67,9 +63,6 @@ export const POST: APIRoute = async (context) => {
 
     console.log(`📧 Sending to ${subscribers.length} subscriber(s)`);
 
-    // Render digest
-    const html = renderDigestAsHtml(newPosts);
-
     // Build subject line
     const subject =
       newPosts.length === 1
@@ -79,32 +72,46 @@ export const POST: APIRoute = async (context) => {
     // Create email service
     const emailService = createEmailService();
 
-    // Build unsubscribe token map
-    const tokenMap = new Map<string, string>();
-    for (const sub of subscribers) {
-      tokenMap.set(sub.email, sub.unsubscribe_token);
+    // Send to each subscriber with their unique token in the email body
+    let sent = 0;
+    let failed = 0;
+    for (const subscriber of subscribers) {
+      // Render digest with this subscriber's unique unsubscribe token
+      const html = renderDigestAsHtml(newPosts, subscriber.unsubscribe_token);
+
+      const result = await emailService.send(
+        subscriber.email,
+        subject,
+        html,
+        subscriber.unsubscribe_token
+      );
+
+      if (result.success) {
+        sent++;
+      } else {
+        failed++;
+        console.error(`Failed to send to ${subscriber.email}:`, result.error);
+      }
     }
 
-    // Send batch
-    const sendResult = await emailService.sendBatch(
-      subscribers.map((s) => s.email),
-      subject,
-      html,
-      tokenMap
-    );
+    const sendResult = {
+      success: failed === 0,
+      sent,
+      failed,
+    };
 
     console.log(
       `📧 Send result: ${sendResult.sent} sent, ${sendResult.failed} failed`
     );
 
-    // Log send event
-    const { error: logError } = await db.from('newsletter_sends').insert({
-      post_ids: newPosts.map((p) => p.id).join(','),
-      post_count: newPosts.length,
-      sent_at: new Date().toISOString(),
-      subscriber_count: sendResult.sent,
-      provider: process.env.EMAIL_PROVIDER || 'mock',
-      status: sendResult.success ? 'sent' : 'failed',
+    // Log send event via stored procedure
+    const { error: logError } = await db.rpc('insert_newsletter_send', {
+      p_post_ids: newPosts.map((p) => p.id).join(','),
+      p_post_count: newPosts.length,
+      p_sent_at: new Date().toISOString(),
+      p_subscriber_count: sendResult.sent,
+      p_provider: process.env.EMAIL_PROVIDER || 'mock',
+      p_status: sendResult.success ? 'sent' : 'failed',
     });
 
     if (logError) {

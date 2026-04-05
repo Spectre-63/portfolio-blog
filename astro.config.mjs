@@ -7,7 +7,8 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://mikemcmahon.dev',
+	site: process.env.SITE_URL || 'https://mikemcmahon.dev',
+	output: 'server',
 	adapter: vercel({
 		webAnalytics: {
 			enabled: false,

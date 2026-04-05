@@ -11,15 +11,20 @@ export const GET: APIRoute = async (context) => {
 
     const db = getSupabaseClient();
 
-    // Delete subscriber by token
-    const { error } = await db
-      .from('subscribers')
-      .delete()
-      .eq('unsubscribe_token', token);
+    // Call stored procedure to unsubscribe
+    const { data, error } = await db.rpc('unsubscribe', {
+      p_unsubscribe_token: token,
+    });
 
     if (error) {
       console.error('Database error:', error);
       return new Response('Failed to unsubscribe', { status: 500 });
+    }
+
+    const result = typeof data === 'string' ? JSON.parse(data) : data;
+
+    if (!result.success) {
+      return new Response('Subscriber not found', { status: 404 });
     }
 
     // Return simple confirmation
