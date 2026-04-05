@@ -13,7 +13,7 @@ export const GET: APIRoute = async (context) => {
 
     // Delete subscriber by token
     const { error } = await db
-      .from('subscribers')
+      .from('portfolio_blog.subscribers')
       .delete()
       .eq('unsubscribe_token', token);
 

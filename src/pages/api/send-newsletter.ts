@@ -23,7 +23,7 @@ export const POST: APIRoute = async (context) => {
 
     // Get timestamp of last newsletter send
     const { data: lastSend } = await db
-      .from('newsletter_sends')
+      .from('portfolio_blog.newsletter_sends')
       .select('sent_at')
       .order('sent_at', { ascending: false })
       .limit(1)
@@ -53,7 +53,7 @@ export const POST: APIRoute = async (context) => {
 
     // Get verified subscribers
     const { data: subscribers, error: subError } = await db
-      .from('subscribers')
+      .from('portfolio_blog.subscribers')
       .select('email, unsubscribe_token')
       .eq('verified', true);
 
@@ -98,7 +98,7 @@ export const POST: APIRoute = async (context) => {
     );
 
     // Log send event
-    const { error: logError } = await db.from('newsletter_sends').insert({
+    const { error: logError } = await db.from('portfolio_blog.newsletter_sends').insert({
       post_ids: newPosts.map((p) => p.id).join(','),
       post_count: newPosts.length,
       sent_at: new Date().toISOString(),

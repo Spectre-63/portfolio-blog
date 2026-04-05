@@ -23,7 +23,7 @@ export const POST: APIRoute = async (context) => {
 
     // Check if already subscribed
     const { data: existing } = await db
-      .from('subscribers')
+      .from('portfolio_blog.subscribers')
       .select('id')
       .eq('email', email)
       .single();
@@ -41,7 +41,7 @@ export const POST: APIRoute = async (context) => {
     }, '');
 
     // Insert subscriber
-    const { error } = await db.from('subscribers').insert({
+    const { error } = await db.from('portfolio_blog.subscribers').insert({
       email,
       unsubscribe_token: token,
       verified: true,
