@@ -24,3 +24,10 @@ pnpm-debug.log*
 .idea/
 .vercel/output
 .vercel/output
+
+# test artifacts
+.vitest/
+coverage/
+test-results/
+playwright-report/
+.playwright/
