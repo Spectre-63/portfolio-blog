@@ -43,6 +43,37 @@ const description = 'Manage your email subscription';
 
       <hr style="margin: 2rem 0;" />
 
+      <h2>Or paste your token</h2>
+      <p>
+        If you received an unsubscribe token via email, paste it here to confirm removal:
+      </p>
+
+      <div id="token-form">
+        <form>
+          <div style="margin-bottom: 1rem;">
+            <input
+              type="text"
+              name="token"
+              placeholder="paste your token here"
+              required
+              style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; font-family: monospace;"
+            />
+          </div>
+          <button
+            type="submit"
+            style="background: var(--accent); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;"
+          >
+            Confirm unsubscribe
+          </button>
+        </form>
+
+        <div id="token-message" style="margin-top: 1rem; display: none; padding: 1rem; border-radius: 4px;">
+          <!-- Message will be inserted here -->
+        </div>
+      </div>
+
+      <hr style="margin: 2rem 0;" />
+
       <h2>Or use your email client</h2>
       <p>
         Every email we send includes an official unsubscribe button at the top
@@ -54,12 +85,13 @@ const description = 'Manage your email subscription';
 </BaseLayout>
 
 <script>
-  const form = document.querySelector('#unsubscribe-form form') as HTMLFormElement;
+  // Email form handler
+  const emailForm = document.querySelector('#unsubscribe-form form') as HTMLFormElement;
   const messageDiv = document.getElementById('message');
 
-  form.addEventListener('submit', async (e) => {
+  emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = (form.querySelector('input[name="email"]') as HTMLInputElement).value;
+    const email = (emailForm.querySelector('input[name="email"]') as HTMLInputElement).value;
 
     try {
       const response = await fetch('/api/send-unsubscribe-token', {
@@ -74,8 +106,8 @@ const description = 'Manage your email subscription';
         messageDiv!.style.display = 'block';
         messageDiv!.style.backgroundColor = '#e8f5e9';
         messageDiv!.style.color = '#2e7d32';
-        messageDiv!.textContent = data.message || 'Check your email for the unsubscribe link!';
-        form.reset();
+        messageDiv!.textContent = data.message || 'Check your email for the unsubscribe token!';
+        emailForm.reset();
       } else {
         messageDiv!.style.display = 'block';
         messageDiv!.style.backgroundColor = '#ffebee';
@@ -86,7 +118,40 @@ const description = 'Manage your email subscription';
       messageDiv!.style.display = 'block';
       messageDiv!.style.backgroundColor = '#ffebee';
       messageDiv!.style.color = '#c62828';
-      messageDiv!.textContent = 'Error sending unsubscribe link. Please try again.';
+      messageDiv!.textContent = 'Error sending unsubscribe token. Please try again.';
+    }
+  });
+
+  // Token form handler
+  const tokenForm = document.querySelector('#token-form form') as HTMLFormElement;
+  const tokenMessageDiv = document.getElementById('token-message');
+
+  tokenForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = (tokenForm.querySelector('input[name="token"]') as HTMLInputElement).value.trim();
+
+    try {
+      const response = await fetch(`/api/unsubscribe?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        tokenMessageDiv!.style.display = 'block';
+        tokenMessageDiv!.style.backgroundColor = '#e8f5e9';
+        tokenMessageDiv!.style.color = '#2e7d32';
+        tokenMessageDiv!.innerHTML = '<strong>Success!</strong> You have been unsubscribed.';
+        tokenForm.reset();
+      } else {
+        tokenMessageDiv!.style.display = 'block';
+        tokenMessageDiv!.style.backgroundColor = '#ffebee';
+        tokenMessageDiv!.style.color = '#c62828';
+        tokenMessageDiv!.textContent = 'Invalid or expired token. Please try again.';
+      }
+    } catch (error) {
+      tokenMessageDiv!.style.display = 'block';
+      tokenMessageDiv!.style.backgroundColor = '#ffebee';
+      tokenMessageDiv!.style.color = '#c62828';
+      tokenMessageDiv!.textContent = 'Error processing token. Please try again.';
     }
   });
 </script>

@@ -38,9 +38,9 @@ export const POST: APIRoute = async (context) => {
       );
     }
 
-    // Send email with unsubscribe link
+    // Send email with unsubscribe token (as plain text, no clickable link)
     const siteUrl = process.env.SITE_URL || 'https://mikemcmahon.dev';
-    const unsubscribeLink = `${siteUrl}/api/unsubscribe?token=${subscriber.unsubscribe_token}`;
+    const unsubscribePage = `${siteUrl}/unsubscribe`;
 
     const emailService = createEmailService();
     const result = await emailService.send(
@@ -55,7 +55,7 @@ export const POST: APIRoute = async (context) => {
     <style>
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
       .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-      .button { display: inline-block; background: #3D6B7D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+      .code { background: #f5f5f5; padding: 12px; border-radius: 4px; font-family: monospace; word-break: break-all; margin: 15px 0; }
       .footer { font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 30px; }
     </style>
   </head>
@@ -63,8 +63,14 @@ export const POST: APIRoute = async (context) => {
     <div class="container">
       <h1>Unsubscribe Request</h1>
       <p>You requested to unsubscribe from Mike McMahon's blog email digest.</p>
-      <p><a href="${unsubscribeLink}" class="button" data-no-track="true">Confirm Unsubscribe</a></p>
-      <p>If you did not request this, you can safely ignore this email. Your subscription remains active.</p>
+
+      <h3>To confirm, copy this token:</h3>
+      <div class="code">${subscriber.unsubscribe_token}</div>
+
+      <p>Then visit <a href="${unsubscribePage}">the unsubscribe page</a> and paste it to confirm removal.</p>
+
+      <p style="margin-top: 20px; font-size: 0.9rem;">If you did not request this, you can safely ignore this email. Your subscription remains active.</p>
+
       <div class="footer">
         <p>© ${new Date().getFullYear()} Mike McMahon</p>
       </div>
