@@ -23,12 +23,24 @@ export const POST: APIRoute = async (context) => {
     const db = getSupabaseClient();
 
     // Get subscriber by email
-    const { data: subscriber, error: queryError } = await db.rpc('get_subscriber_by_email', {
+    const { data: subscribers, error: queryError } = await db.rpc('get_subscriber_by_email', {
       p_email: email,
     });
 
-    if (queryError || !subscriber) {
+    if (queryError || !subscribers || (Array.isArray(subscribers) && subscribers.length === 0)) {
       // Don't reveal whether email exists (security)
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'If this email is subscribed, you will receive an unsubscribe link shortly.',
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Handle both single object and array responses from RPC
+    const subscriber = Array.isArray(subscribers) ? subscribers[0] : subscribers;
+    if (!subscriber || !subscriber.unsubscribe_token) {
       return new Response(
         JSON.stringify({
           success: true,
