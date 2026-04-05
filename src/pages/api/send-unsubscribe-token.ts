@@ -63,7 +63,7 @@ export const POST: APIRoute = async (context) => {
     <div class="container">
       <h1>Unsubscribe Request</h1>
       <p>You requested to unsubscribe from Mike McMahon's blog email digest.</p>
-      <p><a href="${unsubscribeLink}" class="button">Confirm Unsubscribe</a></p>
+      <p><a href="${unsubscribeLink}" class="button" data-no-track="true">Confirm Unsubscribe</a></p>
       <p>If you did not request this, you can safely ignore this email. Your subscription remains active.</p>
       <div class="footer">
         <p>© ${new Date().getFullYear()} Mike McMahon</p>
