@@ -40,8 +40,9 @@ src/data/clippy-quips.json           // Generated + classics (weekly update)
 **Status:** 
 - ✅ Integrated
 - ✅ Tests passing
-- ⏳ Awaiting first scheduled run (Sunday)
-- 📝 Requires `CLAUDE_API_KEY` secret in GitHub (now set)
+- ✅ GitHub secret configured (CLAUDE_API_KEY)
+- ✅ CI integration verified (generates 31 quips per build)
+- ⏳ Awaiting first scheduled run (Sunday 2026-04-13)
 
 ---
 
@@ -118,6 +119,70 @@ const titleFound = content.includes(post.frontmatter.title) || content.includes(
 
 ---
 
+## Feature: For Lovers of Clippy
+
+Clippy is back—and this time, she's **opinionated about AI**.
+
+Every page you visit, Clippy pops up in the bottom corner with a fresh, sarcastic quip about your work. Monday you might see:
+
+> "It looks like you're building an AI portfolio. I'm an AI. Is this awkward for you?"
+
+By Sunday, after the weekly refresh from HackerNews, you might get:
+
+> "It looks like you're reading about DeepSeek. The benchmarks were wild. You're welcome for the nightmares."
+
+**Why Clippy?**
+- **Personality** — Generic portfolios are forgettable. Clippy adds charm and humor without overshadowing content
+- **Fresh content** — Weekly updates keep the experience alive, tied to real AI news
+- **Zero friction** — Hardcoded classics ensure Clippy always has a joke, even if APIs fail
+- **Low cost** — Single weekly Claude API call instead of runtime overhead
+
+**The Clippy Experience:**
+- Random quip on each page load (category-specific: GENERIC, SESSION, PROJECT, ABOUT)
+- Hover effect shows the full quip (title cards, tooltips)
+- Fresh perspective every Sunday when new stories trend on HackerNews
+- Fallback to hardcoded classics if anything breaks
+
+This is what happens when you treat mascots seriously—they become memorable.
+
+---
+
+## Verification & Testing (This Session)
+
+Initial implementation of Clippy quip generation was complete, but CI integration had a gap:
+
+**Problem:** Astro build hook runs `npm run generate:clippy-quips` during CI, but `CLAUDE_API_KEY` secret wasn't passed to the build step. Generation silently failed, falling back to hardcoded quips.
+
+**Debugging Process:**
+1. Created PR #30 with test commit to trigger CI
+2. Inspected logs: "CLAUDE_API_KEY environment variable is required"
+3. Checked workflow: Secret existed in GitHub, but not passed to build step
+4. First fix: Added env var at job level → ✅ Both builds generated quips
+5. Security concern: Job-level exposed the secret too broadly
+6. Final fix: Moved env var to step-level (only the two build steps that need it)
+
+**Final Configuration:**
+```yaml
+- name: Build project
+  run: npm run build
+  env:
+    CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+
+- name: Build completeness tests
+  run: npm run test:build
+  env:
+    CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+```
+
+**Verification Results (PR #30):**
+- ✅ Build project step: Generated 31 quips from Claude
+- ✅ Build completeness tests step: Generated 31 quips
+- ✅ E2E tests: All passing (chromium, firefox, webkit)
+- ✅ Merge gate: Ready for production
+- ✅ Security: API key isolated to steps that need it
+
+---
+
 ## Testing & Validation
 
 **Local testing:**
@@ -188,4 +253,18 @@ const titleFound = content.includes(post.frontmatter.title) || content.includes(
 
 ## Summary
 
-This session added personality and polish to the portfolio. Clippy now tells AI news jokes, the homepage shows recent work at a glance, and the CI/CD pipeline is future-proof (Node 22 compatible). All changes maintain the principle of graceful degradation—the site works even if external APIs fail.
+This session added personality and polish to the portfolio, then verified it all works in production.
+
+**What shipped:**
+- Clippy tells fresh, AI-themed jokes (31 per rebuild, generated from HackerNews trends)
+- Homepage shows 4 recent posts in a responsive grid
+- Centered "Built with Claude AI" stamp for visual balance
+- CI/CD pipeline upgraded to Node 22 with full Playwright E2E coverage
+
+**What we learned:**
+- Three-tier fallback systems enable bold API integration without risk
+- Step-level env vars are better than job-level for security
+- Pre-commit validation prevents wasted CI cycles
+- Graceful degradation makes production features reliable
+
+All changes maintain the principle of zero-failure builds—the site works even if external APIs fail. Clippy keeps telling jokes whether or not HackerNews is up.
