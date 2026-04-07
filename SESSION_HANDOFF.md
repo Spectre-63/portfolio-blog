@@ -1,194 +1,144 @@
-# Session Handoff — 2026-04-07
+# Session Handoff — 2026-04-07 (CI Test Fixes)
 
-**Context Used:** 62%  
-**Status:** PR #29 awaiting CI completion, all work completed locally
-
----
-
-## What's Done ✅
-
-### 1. Dynamic Clippy Quips System
-- **Files:** `src/scripts/generate-clippy-quips.ts`, `src/integrations/clippy-quips.ts`, `src/data/hardcoded-quips.ts`
-- **Features:**
-  - Fetches trending HackerNews stories (AI/ML filtered)
-  - Claude API generates 5 fresh quips per category
-  - Merges with hardcoded classics
-  - Weekly scheduled regeneration via `.github/workflows/regenerate-clippy-quips.yml`
-- **Requirements:** `CLAUDE_API_KEY` secret in GitHub (✅ SET)
-- **Status:** Code complete, tests passing locally, awaiting CI
-
-### 2. Recent Posts Component
-- **File:** `src/components/RecentPosts.astro`
-- **Features:**
-  - Shows 4 most recent posts on homepage
-  - Responsive grid: 1 col (mobile), 2 cols (tablet), 4 cols (desktop)
-  - Date-stamped bubbles with title, description, link
-- **Status:** Complete, CSS refined (centered, responsive)
-
-### 3. Homepage Polish
-- **File:** `src/pages/index.astro`
-- **Change:** Centered "Built with Claude AI" stamp (display: flex, justify-content: center)
-- **Status:** Complete
-
-### 4. CI/CD Fixes
-- **Files:** `.github/workflows/ci.yml`, `.github/workflows/post-merge-verify.yml`, `tests/build-completeness.test.ts`
-- **Changes:**
-  - Node.js 18 → 22 (Astro 6.1.3 requirement)
-  - Added `npx playwright install` to both workflows
-  - Fixed build tests for HTML entity encoding
-- **Status:** Complete
-
-### 5. Documentation
-- **Files:** `README.md`, `CURRENT_STATE.md`, `src/content/blog/session-dynamic-clippy-recent-posts.md`
-- **Coverage:** Project overview, setup, APIs, CI/CD, testing, deployment
-- **Status:** Complete
-
-### 6. Brain Commit
-- **Method:** openbrain_ingest (ingest ID: `fcbd78612db6e66222ca52b1e5f9def4`)
-- **Content:** Session summary, dynamic quips architecture, user preferences
-- **Timestamp:** ✅ Updated to `2026-04-07T01:56:22Z`
-- **Status:** Complete
+**Status:** PR #29 CI run in progress (new fix pushed 02:44:04Z)
 
 ---
 
-## PR #29 Status ⏳
+## What Was Fixed This Session
+
+### 1. E2E Test Suite Repair
+**Problem:** 83/140 E2E tests failing in PR #29 CI due to:
+- Playwright strict mode violations (selectors matched multiple elements)
+- Wrong test assertions (tests expected navigation that doesn't exist)
+
+**Solution:**
+- ✅ Fixed selector precision across all E2E test files
+  - `a[href="/rss.xml"]` → `aside a[href="/rss.xml"]` (context-specific)
+  - `h1, h2` → `.main-content h1` (explicit targeting)
+  - Removed `article, main` overly broad selectors
+
+- ✅ Fixed test assertions in navigation.spec.ts
+  - Removed `/blog` top-level nav link tests (link doesn't exist)
+  - Updated to test actual sidebar navigation
+  - Fixed main content heading checks
+
+- ✅ Created smoke test suite (tests/e2e/smoke.spec.ts)
+  - 7 critical-path tests, serial execution (bails early)
+  - Tests: home loads, nav exists, posts load, subscribe works, RSS valid
+  - **Runtime: 2.8 seconds on chromium only**
+
+### 2. Pre-commit Validation Infrastructure
+✅ Created `scripts/pre-commit-checks.sh`
+- Runs: unit tests + build + smoke tests (fast, ~3-5 min)
+- Automatically logs to labtime with commit message
+- Prevents regressions before reaching CI
+
+✅ Updated global `~/.claude/CLAUDE.md`
+- Documented pre-commit validation pattern for all projects
+- Portfolio-blog is reference implementation
+- Provided shell script template for adoption across repos
+
+### 3. Labtime Integration
+✅ Integrated labtime logging into pre-commit
+- Auto-logs session notes on pre-commit pass
+- Created backdated entries:
+  - STOP: 2026-04-05 23:00 "portfolio-blog enhancements"
+  - START: 2026-04-06 18:45 "CI/CD pipeline E2E test fixes..."
+
+---
+
+## PR #29 Current State
 
 **Branch:** `feat/ci-cd-pipeline-with-content-validation`
 
-**Commits:**
-1. `66bdfcb` — feat: add recent posts section + fix CI/CD node version
-2. `97286e2` — fix: add Playwright browser installation to CI/CD workflows
-3. `7289b48` — feat: add dynamic AI news-based Clippy quips
-4. `1c89c1c` — refine: improve recent posts layout and center stamp
-5. `d61a306` — docs: add session blog post and update current state
-6. `9ec514f` — docs: replace generic template README with project-specific documentation
+**Commits (9 total):**
+1. feat: add recent posts section (Node 18 → 22)
+2. fix: add Playwright browser installation
+3. feat: add dynamic Clippy quips
+4. refine: improve recent posts layout
+5. docs: add session blog post
+6. docs: replace README
+7. docs: add session handoff
+8. **fix: repair E2E test suite** ← NEW
+9. **chore: integrate labtime logging** ← NEW
+10. **fix: add Playwright system dependency installation** ← LATEST (02:44:04Z)
 
 **CI Status:**
-- Run #8 in progress (latest)
-- ✅ Build passes
-- ✅ Unit/content/build tests pass (23/23)
-- ⏳ E2E tests running (Playwright: chromium, Firefox, webkit, mobile)
+- Previous run (02:40:23Z): **FAILED** — WebKit tests missing system dependencies
+  - Chromium: 66 PASSED ✅
+  - WebKit: 16 FAILED ❌ (libgtk-4.so.1, libopus.so.0, libgst* missing)
 
-**What to check next session:**
-1. Run `gh pr view 29` to see final status
-2. If all green → merge PR
-3. Watch for first scheduled quip regeneration (Sunday 00:00 UTC)
+- **Current run (02:44:04Z): IN PROGRESS** 🔄
+  - Added `npx playwright install-deps` to CI workflow
+  - Should resolve WebKit browser dependency errors
 
 ---
 
-## Next Session Checklist
+## Key Files Modified
 
-### Immediate (after context loads)
-```bash
-# Check PR status
-gh pr view 29 --json statusCheckRollup
-
-# If ready to merge:
-gh pr merge 29 --squash  # or regular merge, your choice
-git checkout main && git pull
-
-# Verify local build works post-merge:
-npm run build && npm run test:all
-```
-
-### Verify Deployments
-- [ ] Check Vercel deployment status after merge
-- [ ] Visit https://mikemcmahon.dev homepage
-  - [ ] Recent posts section visible (4 items)
-  - [ ] Items responsive on different screen sizes
-  - [ ] Stamp centered
-  - [ ] Clippy quips working (may be hardcoded fallback if CLAUDE_API_KEY not working)
-- [ ] Verify new session blog post appears in sidebar
-
-### Monitor First Scheduled Run
-- [ ] Set reminder for Sunday 00:00 UTC to check GitHub Actions
-- [ ] Verify `.github/workflows/regenerate-clippy-quips.yml` fires successfully
-- [ ] Check if `src/data/clippy-quips.json` gets auto-committed with fresh quips
-- [ ] If it fails, check logs for HackerNews or Claude API issues
-
-### Potential Issues to Watch
-1. **Playwright timeout:** If E2E tests timeout, may need to increase `timeout-minutes: 30` in ci.yml
-2. **Claude API:** If quip generation fails, check:
-   - `CLAUDE_API_KEY` is set in GitHub Secrets
-   - Claude API quota/rate limits
-3. **HackerNews:** If fetch fails, fallback to hardcoded quips (graceful degradation)
-4. **Asymmetrical layouts:** User preference learned — always prefer balanced grids, centered elements
+| File | Purpose |
+|------|---------|
+| `tests/e2e/smoke.spec.ts` | NEW: 7 critical-path tests, serial execution |
+| `scripts/pre-commit-checks.sh` | NEW: Pre-commit validation + labtime logging |
+| `tests/e2e/*.spec.ts` | FIXED: Selector precision, test assertions |
+| `package.json` | UPDATED: test:smoke, test:e2e, test:all commands |
+| `.github/workflows/ci.yml` | FIXED: Added `npx playwright install-deps` |
+| `~/.claude/CLAUDE.md` | UPDATED: Pre-commit validation pattern docs |
 
 ---
 
-## Key Files Reference
+## What's Pending
 
-| File | Purpose | Last Updated |
-|------|---------|--------------|
-| `src/components/RecentPosts.astro` | Recent posts section | 2026-04-07 |
-| `src/scripts/generate-clippy-quips.ts` | HN + Claude quip generation | 2026-04-07 |
-| `src/integrations/clippy-quips.ts` | Astro build hook | 2026-04-07 |
-| `src/data/hardcoded-quips.ts` | Classic quips (fallback) | 2026-04-07 |
-| `src/data/clippy-quips.json` | Generated + hardcoded (seed) | 2026-04-07 |
-| `.github/workflows/regenerate-clippy-quips.yml` | Weekly scheduled regen | 2026-04-07 |
-| `src/components/ClippyWidget.astro` | Clippy UI (imports quips JSON) | 2026-04-07 |
-| `src/pages/index.astro` | Homepage (recent posts + stamp) | 2026-04-07 |
-| `.github/workflows/ci.yml` | Main CI pipeline | 2026-04-07 |
-| `.github/workflows/post-merge-verify.yml` | Post-merge verification | 2026-04-07 |
-| `README.md` | Project documentation | 2026-04-07 |
-| `CURRENT_STATE.md` | Operational status | 2026-04-07 |
+⏳ **CI test results** (expected in ~3-5 min)
+- Waiting for run 24061597047 to complete
+- Should show: all tests PASSING if system dependency fix works
+
+🚀 **Post-CI tasks:**
+1. Verify all E2E tests pass on chromium, firefox, webkit
+2. Check Merge Gate passes
+3. Merge PR #29 to main
+4. Monitor first Clippy quip regeneration (Sunday 00:00 UTC)
 
 ---
 
-## Architecture Decisions Made
+## Architecture Decisions
 
-1. **Three-tier fallback for Clippy quips:** Generated JSON → hardcoded constants → inline
-   - Ensures build never fails due to API issues
-   - Graceful degradation
+1. **Smoke tests only (not full multi-browser)** for pre-commit
+   - Fast feedback (~2.8s) prevents broken code reaching CI
+   - Full suite (12+ min) runs in CI only
 
-2. **Build-time generation:** Astro integration hook runs at `astro:build:start`
-   - No runtime cost
-   - HackerNews + Claude called once per deploy (or scheduled)
+2. **Serial test execution** in smoke suite
+   - Bails early on critical failure
+   - Prevents cascading failures from wasting cycles
 
-3. **Weekly scheduled regeneration:** Sunday 00:00 UTC
-   - Auto-commits if changed
-   - Manual trigger available for testing
+3. **Labtime integration in pre-commit**
+   - Automatic session tracking without manual commands
+   - One entry point (`scripts/pre-commit-checks.sh`) handles validation + logging
 
-4. **Responsive grid (fixed columns):** 1/2/4 column breakpoints
-   - User preference: avoid asymmetrical layouts (2+1 causes discomfort)
-   - Better than `auto-fit` which can produce awkward distributions
-
-5. **Recent posts count:** 4 items
-   - Fits perfectly in 4-column grid on desktop
-   - Balanced on tablet (2x2)
-   - Stacked on mobile (1x4)
+4. **Context-specific selectors** in E2E tests
+   - `aside a[href="/rss.xml"]` vs just `a[href="/rss.xml"]`
+   - Prevents Playwright strict mode violations
+   - More maintainable (breaks if layout changes, catches regressions)
 
 ---
 
-## User Preferences Documented
-
-- **Asymmetrical layouts cause visual discomfort** → Always prefer balanced, centered designs
-- **Visual centering improves perceived balance** → Center important elements
-- **Responsive design critical** → Test across mobile/tablet/desktop
-- **Graceful degradation over hard failures** → Never let external APIs block the build
-
----
-
-## Links for Next Session
+## References
 
 - **PR:** https://github.com/Spectre-63/portfolio-blog/pull/29
-- **Site:** https://mikemcmahon.dev
-- **openbrain ingest:** fcbd78612db6e66222ca52b1e5f9def4
-- **Clocktime:** Schedule Sunday 00:00 UTC check for Clippy quip regen
+- **Current CI Run:** https://github.com/Spectre-63/portfolio-blog/actions/runs/24061597047
+- **Latest Commit:** c14fdba (fix: add Playwright system dependency installation)
+- **Global Docs:** ~/.claude/CLAUDE.md (Pre-commit validation section)
 
 ---
 
-## Session Notes
+## Next Session Context
 
-- E2E tests very slow (Playwright multi-browser) — allow 5-10 min for CI
-- `UserPromptSubmit` hook working correctly (session_guard.py) — reminds about hourly brain commits
-- `PostToolUse` hook should update brain commit timestamp automatically (verify next session)
-- All local tests passing (23/23)
-- No blockers, just waiting for CI to complete
-
----
+1. Check CI results on return
+2. If passing → merge PR #29
+3. If failing → check E2E test logs, fix remaining issues
+4. After merge: verify Vercel deployment
+5. Monitor Clippy quip regeneration workflow on first Sunday run
 
 **Prepared by:** Claude Haiku 4.5  
-**Session started:** 2026-04-06 19:12:49 UTC  
-**Handoff prepared:** 2026-04-07 01:56 UTC  
-**Context used:** 62%
+**Session started:** 2026-04-06 18:45 MDT  
+**Context used:** ~85%
