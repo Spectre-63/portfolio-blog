@@ -20,12 +20,15 @@ const formatDate = (date: Date) => {
     day: 'numeric'
   });
 };
+
+// Get 4 most recent posts
+const fourRecentPosts = recentPosts.slice(0, 4);
 ---
 
 <section class="recent-posts">
   <h2>Recent Posts</h2>
   <div class="posts-grid">
-    {recentPosts.map((post) => (
+    {fourRecentPosts.map((post) => (
       <article class="post-bubble">
         <a href={getSlug(post.id)}>
           <h3>{post.data.title}</h3>
@@ -54,8 +57,23 @@ const formatDate = (date: Date) => {
 
   .posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
+    /* Default: 1 column on mobile */
+    grid-template-columns: 1fr;
+  }
+
+  /* Tablet: 2 columns */
+  @media (min-width: 768px) {
+    .posts-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Desktop: 4 columns for balanced layout */
+  @media (min-width: 1200px) {
+    .posts-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 
   .post-bubble {
